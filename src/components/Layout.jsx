@@ -6,9 +6,12 @@ import {
   HomeIcon,
   PlusCircleIcon,
   ArrowRightOnRectangleIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 // CUSTOM IMPORTS
 import useAuthStore from "../store/authStore";
+import useThemeStore from "../store/themeStore";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -17,7 +20,8 @@ const navigation = [
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const { isDarkMode, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -156,6 +160,23 @@ export default function Layout() {
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
+
+          <div className="flex flex-1 justify-end items-center gap-x-4">
+            <div className="text-sm text-gray-700">
+              Welcome, <b>{user?.email?.split('@')[0] || 'User'}</b>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-700 hover:bg-gray-100 rounded-full"
+            >
+              <span className="sr-only">Toggle theme</span>
+              {isDarkMode ? (
+                <SunIcon className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <MoonIcon className="h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
 
         <main className="py-10">

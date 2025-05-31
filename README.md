@@ -150,17 +150,42 @@ yarn dev
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /collections/{collectionId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && 
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+
+    // Allow public access to check if admin exists (needed for first-time setup)
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Admin-only collections
+    match /collections/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Allow admin access to all collection items
+    match /{collectionId}/{document=**} {
+      allow read, write: if isAdmin() && 
+        exists(/databases/$(database)/documents/collections/$(collectionId));
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
+
 ```
 
 #### Storage Rules

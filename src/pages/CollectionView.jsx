@@ -606,22 +606,26 @@ export default function CollectionView() {
       {/* Header Section */}
       {renderHeader()}
 
-      {/* Filters Section */}
-      {renderFilters()}
+      {collectionData && (
+        <>
+          {/* Filters Section */}
+          {renderFilters()}
 
-      {/* Table Section */}
-      {renderDataTable()}
+          {/* Table Section */}
+          {renderDataTable()}
 
-      {/* Pagination Section */}
-      <CustomPagination
-        items={items}
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        setItemsPerPage={setItemsPerPage}
-        handlePageChange={handlePageChange}
-        currentPage={currentPage}
-        hasMore={hasMore}
-      />
+          {/* Pagination Section */}
+          <CustomPagination
+            items={items}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            handlePageChange={handlePageChange}
+            currentPage={currentPage}
+            hasMore={hasMore}
+          />
+        </>
+      )}
 
       {isModalOpen && (
         <ItemForm

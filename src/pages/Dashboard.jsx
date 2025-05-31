@@ -533,27 +533,41 @@ export default function Dashboard() {
     );
   }
 
+  if (!collections.length && !loading) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Collections not found
+        </h2>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Header Section */}
       {renderHeader()}
 
-      {/* Filters Section */}
-      {renderFilters()}
+      {collections.length ? (
+        <>
+          {/* Filters Section */}
+          {renderFilters()}
 
-      {/* Table Section */}
-      {renderDataTable()}
+          {/* Table Section */}
+          {renderDataTable()}
 
-      {/* Pagination Section */}
-      <CustomPagination
-        items={collections}
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        setItemsPerPage={setItemsPerPage}
-        handlePageChange={handlePageChange}
-        currentPage={currentPage}
-        hasMore={hasMore}
-      />
+          {/* Pagination Section */}
+          <CustomPagination
+            items={collections}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            handlePageChange={handlePageChange}
+            currentPage={currentPage}
+            hasMore={hasMore}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
