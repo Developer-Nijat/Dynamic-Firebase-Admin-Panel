@@ -16,7 +16,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
