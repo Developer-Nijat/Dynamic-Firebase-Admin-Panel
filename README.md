@@ -112,7 +112,7 @@ A powerful and flexible admin panel built with React and Firebase, allowing dyna
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/dynamic-firebase-admin-panel.git
+git clone https://github.com/Developer-Nijat/Dynamic-Firebase-Admin-Panel.git
 cd dynamic-firebase-admin-panel
 ```
 
