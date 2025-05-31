@@ -97,7 +97,8 @@ export default function CollectionEdit() {
         updatedAt: new Date().toISOString(),
       });
       toast.success("Collection updated successfully");
-      navigate(`/collections/${collectionId}`);
+      // navigate(`/collections/${collectionId}`);
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Failed to update collection");
       console.error("Error updating collection:", error);

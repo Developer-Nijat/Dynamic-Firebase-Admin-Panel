@@ -19,8 +19,6 @@ import {
   ChevronUpIcon,
   MagnifyingGlassIcon,
   PencilIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
@@ -28,9 +26,9 @@ import dayjs from "dayjs";
 // CUSTOM IMPORTS
 import { db } from "../config/firebase";
 import { buttonClasses, inputClasses } from "../constants/styleClasses";
+import CustomPagination from "../components/CustomPagination";
 
 const ITEMS_PER_PAGE = 10;
-const PAGE_LIMIT_OPTIONS = [5, 10, 25, 50, 100, 500];
 
 export default function Dashboard() {
   const [collections, setCollections] = useState([]);
@@ -233,16 +231,8 @@ export default function Dashboard() {
     setFilters({});
   };
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-64">
-  //       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-  //     </div>
-  //   );
-  // }
-
-  return (
-    <div>
+  function renderHeader() {
+    return (
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <div className="flex items-center">
@@ -264,8 +254,11 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
+    );
+  }
 
-      {/* Filters Section */}
+  function renderFilters() {
+    return (
       <div className="mt-4">
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -373,7 +366,11 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+    );
+  }
 
+  function renderDataTable() {
+    return (
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -533,63 +530,30 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Pagination */}
-      <div className="mt-6 flex items-center justify-between bg-white px-6 py-4 border border-gray-200 rounded-lg shadow-sm">
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-700">
-            Showing {collections.length} of {totalItems} collections
-          </div>
-          <div className="flex items-center space-x-2">
-            {/* <label htmlFor="itemsPerPage" className="text-sm text-gray-700">
-              Items per page:
-            </label> */}
-            <select
-              id="itemsPerPage"
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className={`${inputClasses.base} ${inputClasses.text} py-1 px-2`}
-            >
-              {PAGE_LIMIT_OPTIONS.map((limit) => (
-                <option key={limit} value={limit}>
-                  {limit}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`${buttonClasses.secondary} ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <ChevronLeftIcon className="h-5 w-5 mr-2" />
-            Previous
-          </button>
+  return (
+    <div>
+      {/* Header Section */}
+      {renderHeader()}
 
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {Math.ceil(totalItems / itemsPerPage)}
-          </span>
+      {/* Filters Section */}
+      {renderFilters()}
 
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={
-              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
-            }
-            className={`${buttonClasses.secondary} ${
-              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
-          >
-            Next
-            <ChevronRightIcon className="h-5 w-5 ml-2" />
-          </button>
-        </div>
-      </div>
+      {/* Table Section */}
+      {renderDataTable()}
+
+      {/* Pagination Section */}
+      <CustomPagination
+        items={collections}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        handlePageChange={handlePageChange}
+        currentPage={currentPage}
+        hasMore={hasMore}
+      />
     </div>
   );
 }

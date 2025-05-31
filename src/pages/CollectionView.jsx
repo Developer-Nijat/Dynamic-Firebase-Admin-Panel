@@ -22,18 +22,16 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   MagnifyingGlassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   TrashIcon,
-  PencilIcon
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 // CUSTOM IMPORTS
 import { db } from "../config/firebase";
 import { buttonClasses, inputClasses } from "../constants/styleClasses";
+import CustomPagination from "../components/CustomPagination";
 
 const ITEMS_PER_PAGE = 10;
-const PAGE_LIMIT_OPTIONS = [5, 10, 25, 50, 100, 500];
 
 export default function CollectionView() {
   const { collectionId } = useParams();
@@ -304,29 +302,8 @@ export default function CollectionView() {
     }
   };
 
-  if (loading && !items.length) {
+  function renderHeader() {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (!collectionData) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Collection not found
-        </h2>
-        <Link to="/" className="mt-4 text-blue-600 hover:text-blue-900">
-          Return to Dashboard
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <div className="flex items-center">
@@ -351,8 +328,11 @@ export default function CollectionView() {
           </Link>
         </div>
       </div>
+    );
+  }
 
-      {/* Filters Section */}
+  function renderFilters() {
+    return (
       <div className="mt-6">
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -441,7 +421,11 @@ export default function CollectionView() {
           </div>
         )}
       </div>
+    );
+  }
 
+  function renderDataTable() {
+    return (
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -449,11 +433,11 @@ export default function CollectionView() {
               <div className="bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center">
                 <div className="flex items-center space-x-4">
                   {/* <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                    className={`${inputClasses.checkbox} cursor-pointer`}
-                  /> */}
+          type="checkbox"
+          checked={isAllSelected}
+          onChange={handleSelectAll}
+          className={`${inputClasses.checkbox} cursor-pointer`}
+        /> */}
                   <span className="text-sm font-medium text-gray-700">
                     {selectedItems.size} selected
                   </span>
@@ -601,63 +585,43 @@ export default function CollectionView() {
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Pagination */}
-      <div className="mt-6 flex items-center justify-between bg-white px-6 py-4 border border-gray-200 rounded-lg shadow-sm">
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-700">
-            Showing {items.length} of {totalItems} items
-          </div>
-          <div className="flex items-center space-x-2">
-            {/* <label htmlFor="itemsPerPage" className="text-sm text-gray-700">
-              Items per page:
-            </label> */}
-            <select
-              id="itemsPerPage"
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className={`${inputClasses.base} ${inputClasses.text} py-1 px-2`}
-            >
-              {PAGE_LIMIT_OPTIONS.map((limit) => (
-                <option key={limit} value={limit}>
-                  {limit}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`${buttonClasses.secondary} ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <ChevronLeftIcon className="h-5 w-5 mr-2" />
-            Previous
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {Math.ceil(totalItems / itemsPerPage)}
-          </span>
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={
-              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
-            }
-            className={`${buttonClasses.secondary} ${
-              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
-          >
-            Next
-            <ChevronRightIcon className="h-5 w-5 ml-2" />
-          </button>
-        </div>
+  if (!collectionData && !loading) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Collection not found
+        </h2>
+        <Link to="/" className="mt-4 text-blue-600 hover:text-blue-900">
+          Return to Dashboard
+        </Link>
       </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Header Section */}
+      {renderHeader()}
+
+      {/* Filters Section */}
+      {renderFilters()}
+
+      {/* Table Section */}
+      {renderDataTable()}
+
+      {/* Pagination Section */}
+      <CustomPagination
+        items={items}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        handlePageChange={handlePageChange}
+        currentPage={currentPage}
+        hasMore={hasMore}
+      />
 
       {isModalOpen && (
         <ItemForm
