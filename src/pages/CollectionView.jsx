@@ -25,6 +25,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   TrashIcon,
+  PencilIcon
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 // CUSTOM IMPORTS
@@ -32,6 +33,7 @@ import { db } from "../config/firebase";
 import { buttonClasses, inputClasses } from "../constants/styleClasses";
 
 const ITEMS_PER_PAGE = 10;
+const PAGE_LIMIT_OPTIONS = [5, 10, 25, 50, 100, 500];
 
 export default function CollectionView() {
   const { collectionId } = useParams();
@@ -51,6 +53,7 @@ export default function CollectionView() {
   const [lastDocs, setLastDocs] = useState({});
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
 
   useEffect(() => {
     fetchCollectionData();
@@ -63,11 +66,11 @@ export default function CollectionView() {
   }, [collectionData, sortField, sortDirection, filters]);
 
   useEffect(() => {
-    // Reset pagination when sort or filters change
+    // Reset pagination when sort, filters, or itemsPerPage change
     setCurrentPage(1);
     setLastDocs({});
     fetchItems();
-  }, [sortField, sortDirection, filters]);
+  }, [sortField, sortDirection, filters, itemsPerPage]);
 
   const fetchCollectionData = async () => {
     try {
@@ -93,7 +96,7 @@ export default function CollectionView() {
       let q = query(
         itemsRef,
         orderBy(sortField, sortDirection),
-        limit(ITEMS_PER_PAGE)
+        limit(itemsPerPage)
       );
 
       // If not on first page, use the last document from previous page
@@ -102,7 +105,7 @@ export default function CollectionView() {
           itemsRef,
           orderBy(sortField, sortDirection),
           startAfter(lastDocs[page - 1]),
-          limit(ITEMS_PER_PAGE)
+          limit(itemsPerPage)
         );
       }
 
@@ -138,7 +141,7 @@ export default function CollectionView() {
       }));
 
       // Check if there are more pages
-      setHasMore(itemsSnapshot.docs.length === ITEMS_PER_PAGE);
+      setHasMore(itemsSnapshot.docs.length === itemsPerPage);
 
       setItems(itemsList);
 
@@ -227,7 +230,7 @@ export default function CollectionView() {
   };
 
   const handlePageChange = async (newPage) => {
-    if (newPage < 1 || newPage > Math.ceil(totalItems / ITEMS_PER_PAGE)) return;
+    if (newPage < 1 || newPage > Math.ceil(totalItems / itemsPerPage)) return;
 
     setCurrentPage(newPage);
     await fetchItems(newPage);
@@ -326,9 +329,14 @@ export default function CollectionView() {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            {collectionData?.name}
-          </h1>
+          <div className="flex items-center">
+            <h1 className="text-2xl font-semibold text-gray-900 mr-4">
+              {collectionData?.name}
+            </h1>
+            {loading && (
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            )}
+          </div>
           <p className="mt-2 text-sm text-gray-700">
             {collectionData?.description}
           </p>
@@ -440,12 +448,12 @@ export default function CollectionView() {
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <div className="bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center">
                 <div className="flex items-center space-x-4">
-                  <input
+                  {/* <input
                     type="checkbox"
                     checked={isAllSelected}
                     onChange={handleSelectAll}
                     className={`${inputClasses.checkbox} cursor-pointer`}
-                  />
+                  /> */}
                   <span className="text-sm font-medium text-gray-700">
                     {selectedItems.size} selected
                   </span>
@@ -478,7 +486,7 @@ export default function CollectionView() {
                       <th
                         key={field.name}
                         scope="col"
-                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer"
+                        className="py-3.5 pl-4 pr-3 capitalize text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer"
                         onClick={() => handleSort(field.name)}
                       >
                         {field.name}
@@ -542,7 +550,7 @@ export default function CollectionView() {
                       {collectionData?.fields.map((field) => (
                         <td
                           key={field.name}
-                          className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+                          className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6"
                         >
                           {item[field.name] !== undefined
                             ? String(item[field.name])
@@ -565,7 +573,7 @@ export default function CollectionView() {
                             to={`/collections/${collectionId}/items/${item.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
                           >
-                            Edit
+                            <PencilIcon className="h-5 w-5" />
                           </Link>
                           <button
                             onClick={() => handleDeleteItem(item.id)}
@@ -596,8 +604,27 @@ export default function CollectionView() {
 
       {/* Pagination */}
       <div className="mt-6 flex items-center justify-between bg-white px-6 py-4 border border-gray-200 rounded-lg shadow-sm">
-        <div className="text-sm text-gray-700">
-          Showing {items.length} of {totalItems} items
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-700">
+            Showing {items.length} of {totalItems} items
+          </div>
+          <div className="flex items-center space-x-2">
+            {/* <label htmlFor="itemsPerPage" className="text-sm text-gray-700">
+              Items per page:
+            </label> */}
+            <select
+              id="itemsPerPage"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className={`${inputClasses.base} ${inputClasses.text} py-1 px-2`}
+            >
+              {PAGE_LIMIT_OPTIONS.map((limit) => (
+                <option key={limit} value={limit}>
+                  {limit}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <button
@@ -612,16 +639,16 @@ export default function CollectionView() {
           </button>
 
           <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {Math.ceil(totalItems / ITEMS_PER_PAGE)}
+            Page {currentPage} of {Math.ceil(totalItems / itemsPerPage)}
           </span>
 
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={
-              !hasMore || currentPage >= Math.ceil(totalItems / ITEMS_PER_PAGE)
+              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
             }
             className={`${buttonClasses.secondary} ${
-              !hasMore || currentPage >= Math.ceil(totalItems / ITEMS_PER_PAGE)
+              !hasMore || currentPage >= Math.ceil(totalItems / itemsPerPage)
                 ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}
