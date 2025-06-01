@@ -124,6 +124,15 @@ export default function CollectionView() {
               return itemDate === value;
             }
 
+            // Find the field definition to check if it's an enum
+            const fieldDefinition = collectionData.fields.find(f => f.name === field);
+            
+            // For enum fields, use exact match
+            if (fieldDefinition?.type === "enum") {
+              return String(item[field]).toLowerCase() === String(value).toLowerCase();
+            }
+
+            // For other fields, use contains
             return String(item[field])
               .toLowerCase()
               .includes(String(value).toLowerCase());
@@ -336,7 +345,7 @@ export default function CollectionView() {
       <div className="mt-6">
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
+          className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200 cursor-pointer"
         >
           {isFilterOpen ? (
             <ChevronUpIcon className="h-5 w-5 mr-2" />
@@ -363,6 +372,21 @@ export default function CollectionView() {
                       }
                       className={`${inputClasses.base} ${inputClasses.date}`}
                     />
+                  ) : field.type === "enum" ? (
+                    <select
+                      value={tempFilters[field.name] || ""}
+                      onChange={(e) =>
+                        handleFilterChange(field.name, e.target.value)
+                      }
+                      className={`${inputClasses.base} ${inputClasses.select}`}
+                    >
+                      <option value="">All</option>
+                      {field.options.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
                   ) : (
                     <input
                       type="text"

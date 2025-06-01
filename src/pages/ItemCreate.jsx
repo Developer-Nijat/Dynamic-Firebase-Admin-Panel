@@ -75,7 +75,7 @@ export default function ItemCreate() {
       const itemData = {
         ...formData,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        // updatedAt: new Date().toISOString(),
       };
 
       await addDoc(collection(db, collectionId), itemData);
