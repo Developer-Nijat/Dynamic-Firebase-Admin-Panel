@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -14,7 +14,7 @@ export default function FirstTimeSetup() {
     formState: { errors },
   } = useForm();
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     try {
@@ -35,7 +35,8 @@ export default function FirstTimeSetup() {
       });
 
       toast.success("Admin user created successfully!");
-      navigate("/login");
+      // navigate("/login");
+      window.location.href = "/"; // Redirect to main page after setup
     } catch (error) {
       console.error("Error creating admin user:", error);
       toast.error(error.message);
