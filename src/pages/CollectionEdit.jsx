@@ -16,6 +16,7 @@ export default function CollectionEdit() {
     description: "",
     fields: [],
   });
+  const [rawOptions, setRawOptions] = useState({});
 
   useEffect(() => {
     fetchCollectionData();
@@ -71,10 +72,30 @@ export default function CollectionEdit() {
   };
 
   const handleFieldChange = (index, field) => {
+    if (field.type === "enum" && field.options) {
+      setRawOptions((prev) => ({
+        ...prev,
+        [index]: field.options,
+      }));
+    }
     setFormData((prev) => ({
       ...prev,
       fields: prev.fields.map((f, i) => (i === index ? { ...f, ...field } : f)),
     }));
+  };
+
+  const handleOptionsChange = (index, value) => {
+    setRawOptions((prev) => ({
+      ...prev,
+      [index]: value,
+    }));
+
+    const processedOptions = value
+      .split(",")
+      .map((opt) => opt.trim())
+      .filter(Boolean);
+
+    handleFieldChange(index, { options: processedOptions });
   };
 
   const handleSubmit = async (e) => {
@@ -281,14 +302,9 @@ export default function CollectionEdit() {
                       <input
                         type="text"
                         id={`field-options-${index}`}
-                        value={field.options.join(", ")}
+                        value={rawOptions[index] || field.options.join(", ")}
                         onChange={(e) =>
-                          handleFieldChange(index, {
-                            options: e.target.value
-                              .split(",")
-                              .map((opt) => opt.trim())
-                              .filter(Boolean),
-                          })
+                          handleOptionsChange(index, e.target.value)
                         }
                         className={`${inputClasses.base} ${inputClasses.text}`}
                         placeholder="Enter options separated by commas"
